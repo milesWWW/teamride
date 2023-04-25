@@ -4,63 +4,91 @@ from run import app
 from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter, update_counterbyid
 from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
+from flask import Blueprint, jsonify, request
+from .models import db, Team, TeamParticipant, User
+from .dao import DAO
 
+api_bp = Blueprint('api', __name__)
+dao = DAO(db)
 
-@app.route('/')
-def index():
-    """
-    :return: 返回index页面
-    """
-    return render_template('index.html')
+# 获取队伍列表
+@api_bp.route('/teams', methods=['GET'])
+def get_teams():
+    teams = Team.query.all()
+    team_list = []
+    for team in teams:
+        team_dict = team.__dict__
+        team_dict.pop('_sa_instance_state', None)
+        team_list.append(team_dict)
+    return jsonify(team_list)
 
+# 获取队伍详情
+@api_bp.route('/teams/<int:team_id>', methods=['GET'])
+def get_team_detail(team_id):
+    team = dao.get_team_by_id(team_id)
+    if not team:
+        return jsonify({'message': 'Team not found'}), 404
+    team_dict = team.__dict__
+    team_dict.pop('_sa_instance_state', None)
+    participants = dao.get_participants_by_team_id(team_id)
+    participant_list = []
+    for participant in participants:
+        user = dao.get_user_by_id(participant.user_id)
+        if user:
+            participant_dict = participant.__dict__
+            participant_dict.pop('_sa_instance_state', None)
+            participant_dict['user'] = user.__dict__
+            participant_list.append(participant_dict)
+    team_dict['participants'] = participant_list
+    return jsonify(team_dict)
 
-@app.route('/api/count', methods=['POST'])
-def count():
-    """
-    :return:计数结果/清除结果
-    """
+# 创建队伍
+@api_bp.route('/teams', methods=['POST'])
+def create_team():
+    user_id = request.json.get('user_id')
+    team_info = request.json.get('team_info', {})
+    if not user_id:
+        return jsonify({'message': 'User ID not found'}), 400
+    team_id = dao.add_team(user_id, team_info)
+    return jsonify({'id': team_id})
 
-    # 获取请求体参数
-    params = request.get_json()
+# 更新队伍
+@api_bp.route('/teams/<int:team_id>', methods=['PUT'])
+def update_team(team_id):
+    team_info = request.json.get('team_info', {})
+    result = dao.update_team(team_id, team_info)
+    if not result:
+        return jsonify({'message': 'Team not found'}), 404
+    return jsonify({'message': 'Team updated successfully'})
 
-    # 检查action参数
-    if 'action' not in params:
-        return make_err_response('缺少action参数')
+# 删除队伍
+@api_bp.route('/teams/<int:team_id>', methods=['DELETE'])
+def delete_team(team_id):
+    result = dao.delete_team(team_id)
+    if not result:
+        return jsonify({'message': 'Team not found'}), 404
+    return jsonify({'message': 'Team deleted successfully'})
 
-    # 按照不同的action的值，进行不同的操作
-    action = params['action']
+# 添加参与者
+@api_bp.route('/teams/<int:team_id>/participants', methods=['POST'])
+def add_participant(team_id):
+    user_id = request.json.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID not found'}), 400
+    result = dao.add_participant(team_id, user_id)
+    return jsonify({'id': result})
 
-    # 执行自增操作
-    if action == 'inc':
-        counter = query_counterbyid(1)
-        if counter is None:
-            counter = Counters()
-            counter.id = 1
-            counter.count = 1
-            counter.created_at = datetime.now()
-            counter.updated_at = datetime.now()
-            insert_counter(counter)
-        else:
-            counter.id = 1
-            counter.count += 1
-            counter.updated_at = datetime.now()
-            update_counterbyid(counter)
-        return make_succ_response(counter.count)
+# 删除参与者
+@api_bp.route('/teams/participants/<int:participant_id>', methods=['DELETE'])
+def delete_participant(participant_id):
+    result = dao.delete_participant(participant_id)
+    if not result:
+        return jsonify({'message': 'Participant not found'}), 404
+    return jsonify({'message': 'Participant deleted successfully'})
 
-    # 执行清0操作
-    elif action == 'clear':
-        delete_counterbyid(1)
-        return make_succ_empty_response()
-
-    # action参数错误
-    else:
-        return make_err_response('action参数错误')
-
-
-@app.route('/api/count', methods=['GET'])
-def get_count():
-    """
-    :return: 计数的值
-    """
-    counter = Counters.query.filter(Counters.id == 1).first()
-    return make_succ_response(0) if counter is None else make_succ_response(counter.count)
+# 创建用户
+@api_bp.route('/users', methods=['POST'])
+def create_user():
+    user_id = request.json.get('user_id')
+    if not user_id:
+        return

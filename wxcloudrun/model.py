@@ -4,12 +4,32 @@ from wxcloudrun import db
 
 
 # 计数表
-class Counters(db.Model):
-    # 设置结构体表格名称
-    __tablename__ = 'Counters'
+class Team(db.Model):
+    __tablename__ = 'teams'
 
-    # 设定结构体对应表格的字段
     id = db.Column(db.Integer, primary_key=True)
-    count = db.Column(db.Integer, default=1)
-    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    openid = db.Column(db.String(32), default='default')
+    distance = db.Column(db.Float, default=0.0)
+    limit = db.Column(db.Integer, default=0)
+    location = db.Column(db.String(255))
+    max_speed = db.Column(db.Float, default=0.0)
+    min_speed = db.Column(db.Float, default=0.0)
+    note = db.Column(db.String(255))
+    num_people = db.Column(db.Integer, default=0)
+    route = db.Column(db.String(255))
+    start_date = db.Column(db.String(16))
+    time = db.Column(db.String(16))
+    title = db.Column(db.String(255))
+    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
+    
+class TeamParticipant(db.Model):
+    __tablename__ = 'team_participants'
+
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.String(32), primary_key=True)
