@@ -1,16 +1,19 @@
 from datetime import datetime
 from flask import render_template, request
 from run import app
-from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter, update_counterbyid
-from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 from flask import Blueprint, jsonify, request
-from .models import db, Team, TeamParticipant, User
+from .model import Team, TeamParticipant, User
 from .dao import DAO
+from wxcloudrun import db
 
 api_bp = Blueprint('api', __name__)
 dao = DAO(db)
 
+@app.before_first_request
+def create_tables():
+    db.create_all()
+    
 # 获取队伍列表
 @api_bp.route('/teams', methods=['GET'])
 def get_teams():
