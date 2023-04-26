@@ -1,6 +1,5 @@
 # 创建应用实例
 import sys
-
 from wxcloudrun import app
 
 # 启动Flask Web服务
