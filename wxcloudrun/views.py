@@ -16,6 +16,15 @@ dao = DAO(db)
 def create_tables():
     db.create_all()
 
+@app.before_request
+def log_request_info():
+    app.logger.debug('Headers: %s', request.headers)
+    app.logger.debug('Body: %s', request.get_data())
+    app.logger.debug('Endpoint: %s', request.endpoint)
+    app.logger.debug('Method: %s', request.method)
+    app.logger.debug('URL: %s', request.url)
+    app.logger.debug('Matching URL Rule: %s', request.url_rule)
+
 # 获取队伍列表
 @api_bp.route('/teams', methods=['GET'])
 def get_teams():
