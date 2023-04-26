@@ -8,12 +8,14 @@ from .dao import DAO
 from wxcloudrun import db
 
 api_bp = Blueprint('api', __name__)
+app.register_blueprint(api_bp, url_prefix='/api')
+
 dao = DAO(db)
 
 @app.before_first_request
 def create_tables():
     db.create_all()
-    
+
 # 获取队伍列表
 @api_bp.route('/teams', methods=['GET'])
 def get_teams():
