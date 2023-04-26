@@ -26,7 +26,7 @@ class TeamParticipant(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
 
 class User(db.Model):
     __tablename__ = 'users'
