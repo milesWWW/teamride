@@ -19,7 +19,7 @@ class Team(db.Model):
     start_date = db.Column(db.String(16))
     time = db.Column(db.String(16))
     title = db.Column(db.String(255))
-    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
+    activity_id = db.Column(db.Integer, db.ForeignKey('team_participants.id'))
     
 class TeamParticipant(db.Model):
     __tablename__ = 'team_participants'
