@@ -105,4 +105,6 @@ def delete_participant(participant_id):
 def create_user():
     user_id = request.json.get('user_id')
     if not user_id:
-        return
+        return jsonify({'message': 'User ID not found'}), 400
+    new_user_id = dao.add_user(user_id)
+    return jsonify({'id': new_user_id})
