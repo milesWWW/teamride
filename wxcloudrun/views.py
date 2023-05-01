@@ -6,9 +6,7 @@ from flask import Blueprint, jsonify, request
 from .model import Team, TeamParticipant, User
 from .dao import DAO
 from wxcloudrun import db
-
-api_bp = Blueprint('api', __name__)
-app.register_blueprint(api_bp, url_prefix='/api')
+from .api import api_bp
 
 dao = DAO(db)
 

@@ -8,11 +8,13 @@ pymysql.install_as_MySQLdb()
 
 # 初始化web应用
 app = Flask(__name__, instance_relative_config=True)
+
 app.config['DEBUG'] = config.DEBUG
 
 # 设定数据库链接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{}:{}@{}/flask_demo'.format(config.username, config.password,
-                                                                             config.db_address)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{}:{}@{}/flask_demo'.format(config.username, config.password,
+                                                                            #  config.db_address)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 
 # 初始化DB操作对象
 db = SQLAlchemy(app)
