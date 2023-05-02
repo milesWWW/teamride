@@ -7,7 +7,7 @@ class Team(db.Model):
     __tablename__ = 'teams'
 
     id = db.Column(db.Integer, primary_key=True)
-    openid = db.Column(db.String(32), default='default')
+    user_id = db.Column(db.String(32), default='default')
     distance = db.Column(db.Float, default=0.0)
     limit = db.Column(db.Integer, default=0)
     location = db.Column(db.String(255))

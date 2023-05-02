@@ -10,6 +10,8 @@ from .api import api_bp
 
 dao = DAO(db)
 
+USER_ID = "X-Wx-Openid"
+
 @app.before_first_request
 def create_tables():
     db.create_all()
@@ -57,7 +59,7 @@ def get_team_detail(team_id):
 # 创建队伍
 @api_bp.route('/teams', methods=['POST'])
 def create_team():
-    user_id = request.json.get('user_id')
+    user_id = request.json.get(USER_ID)
     team_info = request.json.get('team_info', {})
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
@@ -84,7 +86,7 @@ def delete_team(team_id):
 # 添加参与者
 @api_bp.route('/teams/<int:team_id>/participants', methods=['POST'])
 def add_participant(team_id):
-    user_id = request.json.get('user_id')
+    user_id = request.json.get(USER_ID)
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
     result = dao.add_participant(team_id, user_id)
@@ -101,7 +103,7 @@ def delete_participant(participant_id):
 # 创建用户
 @api_bp.route('/users', methods=['POST'])
 def create_user():
-    user_id = request.json.get('user_id')
+    user_id = request.json.get(USER_ID)
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
     new_user_id = dao.add_user(user_id)

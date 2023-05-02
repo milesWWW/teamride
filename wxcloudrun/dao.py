@@ -2,6 +2,7 @@ import logging
 
 from sqlalchemy.exc import OperationalError
 from wxcloudrun import db
+from wxcloudrun.model import Team, User, TeamParticipant
 
 # 初始化日志
 logger = logging.getLogger('log')
@@ -17,17 +18,17 @@ class DAO:
     def add_team(self, user_id, team_info):
         team = Team(
             user_id=user_id,
-            distance=team_info['distance'],
-            limit=team_info['limit'],
-            location=team_info['location'],
-            max_speed=team_info['max_speed'],
-            min_speed=team_info['min_speed'],
-            note=team_info['note'],
-            num_people=team_info['num_people'],
-            route=team_info['route'],
-            start_date=team_info['start_date'],
-            time=team_info['time'],
-            title=team_info['title'],
+            distance=team_info.get('distance', 0),
+            limit=team_info.get('limit', 0),
+            location=team_info.get('location', ''),
+            max_speed=team_info.get('max_speed', 0),
+            min_speed=team_info.get('min_speed', 0),
+            note=team_info.get('note', ''),
+            num_people=team_info.get('num_people', 0),
+            route=team_info.get('route', ''),
+            start_date=team_info.get('start_date', ''),
+            time=team_info.get('time', ''),
+            title=team_info.get('title', ''),
         )
         self.db.session.add(team)
         self.db.session.commit()
