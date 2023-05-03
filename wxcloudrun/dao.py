@@ -12,39 +12,52 @@ class DAO:
         self.db = db
 
     def _convert_teaminfo_to_team(self, team_info):
-        return Team(
-            id = team_info.get('id', ''),
-            user_id=team_info.get('userId', ''),
-            distance=team_info.get('distance', 0),
-            limit=team_info.get('limit', 0),
-            location=team_info.get('location', ''),
-            max_speed=team_info.get('maxSpeed', 0),
-            min_speed=team_info.get('minSpeed', 0),
-            note=team_info.get('note', ''),
-            num_people=team_info.get('numPeople', 0),
-            route=team_info.get('route', ''),
-            start_date=team_info.get('startDate', ''),
-            time=team_info.get('time', ''),
-            title=team_info.get('title', ''),
-        )
+        if not team_info:
+            return None
+
+        return Team(**{
+            self.camel_to_snake(key): value for key, value in team_info.items()
+        })        
+        # return Team(
+        #     id = team_info.get('id', ''),
+        #     user_id=team_info.get('userId', ''),
+        #     distance=team_info.get('distance', 0),
+        #     limit=team_info.get('limit', 0),
+        #     location=team_info.get('location', ''),
+        #     max_speed=team_info.get('maxSpeed', 0),
+        #     min_speed=team_info.get('minSpeed', 0),
+        #     note=team_info.get('note', ''),
+        #     num_people=team_info.get('numPeople', 0),
+        #     route=team_info.get('route', ''),
+        #     start_date=team_info.get('startDate', ''),
+        #     time=team_info.get('time', ''),
+        #     title=team_info.get('title', ''),
+        # )
 
     def _convert_team_to_teaminfo(self, team):
-        return {
-            'id': team.id,
-            'userId': team.user_id,
-            'distance': team.distance,
-            'limit': team.limit,
-            'location': team.location,
-            'maxSpeed': team.max_speed,
-            'minSpeed': team.min_speed,
-            'note': team.note,
-            'numPeople': team.num_people,
-            'route': team.route,
-            'startDate': team.start_date,
-            'time': team.time,
-            'title': team.title
+        if not team:
+            return None
 
-        }
+        return {
+            self.snake_to_camel(key): value for key, value in team.__dict__.items()
+            if not key.startswith('_sa_instance_state')
+        }        
+        # return {
+        #     'id': team.id,
+        #     'userId': team.user_id,
+        #     'distance': team.distance,
+        #     'limit': team.limit,
+        #     'location': team.location,
+        #     'maxSpeed': team.max_speed,
+        #     'minSpeed': team.min_speed,
+        #     'note': team.note,
+        #     'numPeople': team.num_people,
+        #     'route': team.route,
+        #     'startDate': team.start_date,
+        #     'time': team.time,
+        #     'title': team.title
+
+        # }
 
     def get_all_teaminfo(self):
         teams = Team.query.all()
