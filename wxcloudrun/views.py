@@ -10,7 +10,7 @@ from .api import api_bp
 
 dao = DAO(db)
 
-USER_ID = "X-Wx-Openid"
+USER_ID = "openid"
 
 @app.before_first_request
 def create_tables():
@@ -28,10 +28,9 @@ def log_request_info():
 # 获取队伍列表
 @api_bp.route('/teams', methods=['GET'])
 def get_teams():
-    teams = Team.query.all()
+    teams = dao.get_all_teaminfo()
     team_list = []
-    for team in teams:
-        team_dict = team.__dict__
+    for team_dict in teams:
         team_dict.pop('_sa_instance_state', None)
         team_list.append(team_dict)
     return jsonify(team_list)
@@ -39,10 +38,9 @@ def get_teams():
 # 获取队伍详情
 @api_bp.route('/teams/<int:team_id>', methods=['GET'])
 def get_team_detail(team_id):
-    team = dao.get_team_by_id(team_id)
-    if not team:
+    team_dict = dao.get_teaminfo_by_id(team_id)
+    if not team_dict:
         return jsonify({'message': 'Team not found'}), 404
-    team_dict = team.__dict__
     team_dict.pop('_sa_instance_state', None)
     participants = dao.get_participants_by_team_id(team_id)
     participant_list = []
@@ -59,11 +57,11 @@ def get_team_detail(team_id):
 # 创建队伍
 @api_bp.route('/teams', methods=['POST'])
 def create_team():
-    user_id = request.json.get(USER_ID)
+    # user_id = request.json.get(USER_ID)
     team_info = request.json.get('team_info', {})
-    if not user_id:
-        return jsonify({'message': 'User ID not found'}), 400
-    team_id = dao.add_team(user_id, team_info)
+    # if not user_id:
+    #     return jsonify({'message': 'User ID not found'}), 400
+    team_id = dao.add_team(team_info)
     return jsonify({'id': team_id})
 
 # 更新队伍
@@ -83,6 +81,13 @@ def delete_team(team_id):
         return jsonify({'message': 'Team not found'}), 404
     return jsonify({'message': 'Team deleted successfully'})
 
+# 获取我参与的队伍
+@api_bp.route('/users/<string:user_id>/teams', methods=['GET'])
+def get_teams_by_user_id(user_id):
+    teams = dao.get_teams_by_user_id(user_id)
+    team_list = [dao._convert_team_to_teaminfo(team) for team in teams]
+    return jsonify(team_list)
+
 # 添加参与者
 @api_bp.route('/teams/<int:team_id>/participants', methods=['POST'])
 def add_participant(team_id):
@@ -93,9 +98,10 @@ def add_participant(team_id):
     return jsonify({'id': result})
 
 # 删除参与者
-@api_bp.route('/teams/participants/<int:participant_id>', methods=['DELETE'])
-def delete_participant(participant_id):
-    result = dao.delete_participant(participant_id)
+@api_bp.route('/teams/participants/<int:team_id>', methods=['DELETE'])
+def delete_participant(team_id):
+    user_id = request.json.get(USER_ID)
+    result = dao.delete_participant(team_id=team_id, user_id=user_id)
     if not result:
         return jsonify({'message': 'Participant not found'}), 404
     return jsonify({'message': 'Participant deleted successfully'})
