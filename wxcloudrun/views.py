@@ -1,11 +1,13 @@
 from datetime import datetime
 from flask import render_template, request
 from run import app
+import requests
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 from flask import Blueprint, jsonify, request
 from .model import Team, TeamParticipant, User
 from .dao import DAO
 from wxcloudrun import db
+import config
 from .api import api_bp
 
 dao = DAO(db)
@@ -24,6 +26,26 @@ def log_request_info():
     app.logger.debug('Method: %s', request.method)
     app.logger.debug('URL: %s', request.url)
     app.logger.debug('Matching URL Rule: %s', request.url_rule)
+
+@api_bp.route('/get_openid', methods=['POST'])
+def get_openid():
+    code = request.json.get('code')
+
+    if not code:
+        return jsonify({'message': 'code not found'}), 400
+
+    # 调用微信接口，获取用户openid和session_key
+    appid = config.APPID
+    secret = config.APP_SECRET
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid={}&secret={}&js_code={}&grant_type=authorization_code'.format(appid, secret, code)
+    res = requests.get(url)
+    openid = res.json().get('openid')
+    session_key = res.json().get('session_key')
+
+    # 将openid和session_key存入数据库或其他存储方式
+    # ...
+
+    return jsonify({'openid': openid}), 200
 
 # 获取队伍列表
 @api_bp.route('/teams', methods=['GET'])
