@@ -116,8 +116,10 @@ def add_participant(team_id):
     user_id = request.json.get(USER_ID)
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
-    if dao.get_participants_by_team_id(team_id):
-         return jsonify({'message': 'User already joined the team'}), 400       
+    participants = dao.get_participants_by_team_id(team_id)
+    for participant in participants:
+        if user_id == participant.user_id:
+            return jsonify({'message': 'User already joined the team'}), 404
     result = dao.add_participant(team_id, user_id)
     return jsonify({'id': result})
 
