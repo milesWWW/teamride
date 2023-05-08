@@ -79,8 +79,9 @@ def get_team_detail(team_id):
 # 创建队伍
 @api_bp.route('/teams', methods=['POST'])
 def create_team():
-    # user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
     team_info = request.json.get('team_info', {})
+    team_info['userId']=user_id
     # if not user_id:
     #     return jsonify({'message': 'User ID not found'}), 400
     team_id = dao.add_team(team_info)
@@ -106,7 +107,7 @@ def delete_team(team_id):
 # 获取我创建的队伍
 @api_bp.route('/users/my_team', methods=['GET'])
 def get_teams_by_me():
-    user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
     teams = dao.get_team_by_user_id_create(user_id)
     team_list = []
     for team_dict in teams:
@@ -117,7 +118,8 @@ def get_teams_by_me():
 # 获取我参与的队伍
 @api_bp.route('/users/teams', methods=['GET'])
 def get_teams_by_user_id():
-    user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
+    # user_id = request.json.get(USER_ID)
     teams = dao.get_teams_by_user_id(user_id)
     team_list = [dao._convert_team_to_teaminfo(team) for team in teams]
     return jsonify(team_list)
@@ -125,7 +127,7 @@ def get_teams_by_user_id():
 # 添加参与者
 @api_bp.route('/teams/<int:team_id>/participants', methods=['POST'])
 def add_participant(team_id):
-    user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
     participants = dao.get_participants_by_team_id(team_id)
@@ -138,7 +140,7 @@ def add_participant(team_id):
 # 删除参与者
 @api_bp.route('/teams/participants/<int:team_id>', methods=['DELETE'])
 def delete_participant(team_id):
-    user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
     result = dao.delete_participant(team_id=team_id, user_id=user_id)
     if not result:
         return jsonify({'message': 'Participant not found'}), 404
@@ -147,7 +149,7 @@ def delete_participant(team_id):
 # 创建用户
 @api_bp.route('/users', methods=['POST'])
 def create_user():
-    user_id = request.json.get(USER_ID)
+    user_id = request.headers.get(USER_ID)
     if not user_id:
         return jsonify({'message': 'User ID not found'}), 400
     new_user_id = dao.add_user(user_id)
