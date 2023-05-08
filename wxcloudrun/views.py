@@ -12,7 +12,7 @@ from .api import api_bp
 
 dao = DAO(db)
 
-USER_ID = "openid"
+USER_ID = "X-WX-OPENID"
 
 @app.before_first_request
 def create_tables():
