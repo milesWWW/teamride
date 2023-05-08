@@ -103,9 +103,21 @@ def delete_team(team_id):
         return jsonify({'message': 'Team not found'}), 404
     return jsonify({'message': 'Team deleted successfully'})
 
+# 获取我创建的队伍
+@api_bp.route('/users/my_team', methods=['GET'])
+def get_teams_by_me():
+    user_id = request.json.get(USER_ID)
+    teams = dao.get_team_by_user_id_create(user_id)
+    team_list = []
+    for team_dict in teams:
+        team_dict.pop('_sa_instance_state', None)
+        team_list.append(team_dict)
+    return jsonify(team_list)
+
 # 获取我参与的队伍
-@api_bp.route('/users/<string:user_id>/teams', methods=['GET'])
-def get_teams_by_user_id(user_id):
+@api_bp.route('/users/teams', methods=['GET'])
+def get_teams_by_user_id():
+    user_id = request.json.get(USER_ID)
     teams = dao.get_teams_by_user_id(user_id)
     team_list = [dao._convert_team_to_teaminfo(team) for team in teams]
     return jsonify(team_list)
