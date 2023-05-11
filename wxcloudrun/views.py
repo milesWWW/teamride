@@ -154,3 +154,6 @@ def create_user():
         return jsonify({'message': 'User ID not found'}), 400
     new_user_id = dao.add_user(user_id)
     return jsonify({'id': new_user_id})
+
+def clear_teams():
+    dao.cleanup_expired_teams()

@@ -1,8 +1,9 @@
 import logging
-
+from datetime import datetime, timedelta
 from sqlalchemy.exc import OperationalError
 from wxcloudrun import db
 from wxcloudrun.model import Team, User, TeamParticipant
+from sqlalchemy import asc
 
 # 初始化日志
 logger = logging.getLogger('log')
@@ -29,7 +30,7 @@ class DAO:
         }        
 
     def get_all_teaminfo(self):
-        teams = Team.query.all()
+        teams = Team.query.order_by(asc(Team.datetime)).all()
         return [self._convert_team_to_teaminfo(team) for team in teams]
 
     def get_team_by_id(self, team_id):
@@ -37,7 +38,7 @@ class DAO:
         return team
 
     def get_team_by_user_id_create(self, user_id):
-        teams = Team.query.filter_by(user_id=user_id).all()
+        teams = Team.query.filter_by(user_id=user_id).order_by(asc(Team.datetime)).all()
         return [self._convert_team_to_teaminfo(team) for team in teams]
 
 
@@ -89,7 +90,12 @@ class DAO:
     def get_teams_by_user_id(self, user_id):
         team_participants = TeamParticipant.query.filter_by(user_id=user_id).all()
         team_ids = [participant.team_id for participant in team_participants]
-        teams = [self.get_team_by_id(team_id) for team_id in team_ids]
+        teams=[]
+        for team_id in team_ids:
+            team = self.get_team_by_id(team_id)
+            if team:
+                teams.append(team)
+        # teams = [self.get_team_by_id(team_id) for team_id in team_ids]
         return teams
 
     def add_participant(self, team_id, user_id):
@@ -138,3 +144,12 @@ class DAO:
     def snake_to_camel(self, s):
         components = s.split('_')
         return components[0] + ''.join(i.capitalize() for i in components[1:])
+
+    def cleanup_expired_teams(self):
+        current_time = datetime.now()
+        expiration_period = timedelta(days=1)
+        expiration_threshold = current_time - expiration_period
+        expired_teams = Team.query.filter(Team.datetime <= expiration_threshold).all()
+        for team in expired_teams:
+            self.delete_team(team.id)
+

@@ -24,3 +24,9 @@ from wxcloudrun import views
 
 # 加载配置
 app.config.from_object('config')
+
+# 每天定时清理过期队伍
+from apscheduler.schedulers.background import BackgroundScheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(views.clear_teams, 'cron', hour=2)
+scheduler.start()
