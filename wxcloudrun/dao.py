@@ -56,6 +56,9 @@ class DAO:
         team = self.get_team_by_id(team_id)
         if not team:
             return False
+        participants = self.get_participants_by_team_id(team_id)
+        for participant in participants:
+            self.db.session.delete(participant)    
         self.db.session.delete(team)
         self.db.session.commit()
         return True
