@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.exc import OperationalError
 from wxcloudrun import db
 from wxcloudrun.model import Team, User, TeamParticipant
-from sqlalchemy import asc
+from sqlalchemy import asc, desc
 
 # 初始化日志
 logger = logging.getLogger('log')
