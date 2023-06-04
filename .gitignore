@@ -1,0 +1,42 @@
+# 忽略编译生成的文件
+*.class
+*.o
+*.pyc
+
+*.db
+
+# 忽略IDE和编辑器生成的文件
+.idea/
+.vscode/
+
+# 忽略依赖管理工具生成的目录
+/node_modules/
+/vendor/
+
+# 忽略本地配置文件
+.env
+.env.*
+config.js
+
+# 忽略日志文件
+/logs/
+*.log
+
+# 忽略临时文件
+.tmp/
+.temp/
+
+# 忽略特定系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略备份文件
+*.bak
+*.backup
+*.swp
+*~
+
+# 忽略特定文件或目录
+/docs/
+/public/assets/
+
