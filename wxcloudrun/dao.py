@@ -30,7 +30,7 @@ class DAO:
         }        
 
     def get_all_teaminfo(self):
-        teams = Team.query.order_by(asc(Team.datetime)).all()
+        teams = Team.query.order_by(desc(Team.datetime)).all()
         return [self._convert_team_to_teaminfo(team) for team in teams]
 
     def get_team_by_id(self, team_id):
