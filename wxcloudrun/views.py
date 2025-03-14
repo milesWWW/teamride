@@ -4,6 +4,7 @@ from run import app
 from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter, update_counterbyid
 from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
+from wxcloudrun.auth import token_required
 
 
 @app.route('/')
@@ -15,6 +16,7 @@ def index():
 
 
 @app.route('/api/count', methods=['POST'])
+@token_required
 def count():
     """
     :return:计数结果/清除结果
@@ -58,6 +60,7 @@ def count():
 
 
 @app.route('/api/count', methods=['GET'])
+@token_required
 def get_count():
     """
     :return: 计数的值
