@@ -5,6 +5,7 @@ from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter
 from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 from wxcloudrun.auth import token_required
+from wxcloudrun.logging_config import logger
 
 
 @app.route('/')
@@ -21,12 +22,14 @@ def count():
     """
     :return:计数结果/清除结果
     """
+    logger.info(f'POST /api/count request: {request.get_json()}')
 
     # 获取请求体参数
     params = request.get_json()
 
     # 检查action参数
     if 'action' not in params:
+        logger.warning('Missing action parameter')
         return make_err_response('缺少action参数')
 
     # 按照不同的action的值，进行不同的操作
@@ -47,15 +50,18 @@ def count():
             counter.count += 1
             counter.updated_at = datetime.now()
             update_counterbyid(counter)
+        logger.info(f'Incremented counter to {counter.count}')
         return make_succ_response(counter.count)
 
     # 执行清0操作
     elif action == 'clear':
         delete_counterbyid(1)
+        logger.info('Counter cleared')
         return make_succ_empty_response()
 
     # action参数错误
     else:
+        logger.warning(f'Invalid action parameter: {action}')
         return make_err_response('action参数错误')
 
 
@@ -65,5 +71,8 @@ def get_count():
     """
     :return: 计数的值
     """
+    logger.info('GET /api/count request')
     counter = Counters.query.filter(Counters.id == 1).first()
-    return make_succ_response(0) if counter is None else make_succ_response(counter.count)
+    count = 0 if counter is None else counter.count
+    logger.info(f'Current count: {count}')
+    return make_succ_response(count)
